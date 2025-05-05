@@ -10,3 +10,5 @@ Each lesson is organized by topic—SELECT, JOIN, GROUP BY, etc, and includes:
 
 I use this collection to track my progress as a self‑taught data analyst, demonstrate my SQL skills, and serve as a reference for future projects.
 
+Link: https://sqlzoo.net/
+
