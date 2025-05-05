@@ -1,0 +1,149 @@
+-- 1. List every country’s name, continent, and population
+SELECT
+    w.name,
+    w.continent,
+    w.population
+FROM
+    world AS w
+ORDER BY
+    w.name;
+
+-- 2. Countries with at least 200 million people
+SELECT
+    w.name
+FROM
+    world AS w
+WHERE
+    w.population >= 200000000
+ORDER BY
+    w.name;
+
+-- 3. GDP per capita for countries ≥ 200M population
+SELECT
+    w.name,
+    ROUND(w.gdp / w.population, 2) AS gdp_per_capita
+FROM
+    world AS w
+WHERE
+    w.population >= 200000000
+ORDER BY
+    gdp_per_capita DESC;
+
+-- 4. Population in millions for South American countries
+SELECT
+    w.name,
+    ROUND(w.population / 1000000, 2) AS population_millions
+FROM
+    world AS w
+WHERE
+    w.continent = 'South America'
+ORDER BY
+    population_millions DESC;
+
+-- 5. Population of France, Germany, and Italy
+SELECT
+    w.name,
+    w.population
+FROM
+    world AS w
+WHERE
+    w.name IN ('France', 'Germany', 'Italy')
+ORDER BY
+    w.name;
+
+-- 6. Countries whose name contains “United”
+SELECT
+    w.name
+FROM
+    world AS w
+WHERE
+    w.name LIKE '%United%'
+ORDER BY
+    w.name;
+
+-- 7. Countries large by area or population
+SELECT
+    w.name,
+    w.population,
+    w.area
+FROM
+    world AS w
+WHERE
+    w.area > 3000000
+    OR w.population > 250000000
+ORDER BY
+    w.name;
+
+-- 8. Countries large by area XOR population
+SELECT
+    w.name,
+    w.population,
+    w.area
+FROM
+    world AS w
+WHERE
+    (w.area > 3000000)
+    XOR (w.population > 250000000)
+ORDER BY
+    w.name;
+
+-- 9. South America: population (M) and GDP (B), rounded
+SELECT
+    w.name,
+    ROUND(w.population / 1000000, 2) AS population_millions,
+    ROUND(w.gdp / 1000000000, 2)       AS gdp_billions
+FROM
+    world AS w
+WHERE
+    w.continent = 'South America'
+ORDER BY
+    w.name;
+
+-- 10. Per‑capita GDP (rounded to nearest $1,000) for trillion‑dollar economies
+SELECT
+    w.name,
+    ROUND((w.gdp / w.population) / 1000, 0) * 1000 AS per_capita_gdp
+FROM
+    world AS w
+WHERE
+    w.gdp >= 1000000000000
+ORDER BY
+    per_capita_gdp DESC;
+
+-- 11. Countries whose capital name is the same length as the country name
+SELECT
+    w.name,
+    w.capital
+FROM
+    world AS w
+WHERE
+    LENGTH(w.name) = LENGTH(w.capital)
+ORDER BY
+    w.name;
+
+-- 12. Countries whose name and capital start with the same letter (but are not identical)
+SELECT
+    w.name,
+    w.capital
+FROM
+    world AS w
+WHERE
+    LEFT(w.name, 1) = LEFT(w.capital, 1)
+    AND w.name <> w.capital
+ORDER BY
+    w.name;
+
+-- 13. Countries with single‑word names containing all five vowels
+SELECT
+    w.name
+FROM
+    world AS w
+WHERE
+    w.name NOT LIKE '% %'     -- no spaces
+    AND w.name LIKE '%a%'
+    AND w.name LIKE '%e%'
+    AND w.name LIKE '%i%'
+    AND w.name LIKE '%o%'
+    AND w.name LIKE '%u%'
+ORDER BY
+    w.name;
