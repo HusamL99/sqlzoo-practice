@@ -1,5 +1,5 @@
 # sqlzoo-practice
-Hands‑on SQLZoo exercises for beginner to intermediate practice
+Hands‑on SQLZoo exercises for beginner to intermediate practice.
 
 This repository contains my solutions to SQLZoo’s interactive tutorials.  
 Each lesson is organized by topic—SELECT, JOIN, GROUP BY, etc, and includes:
