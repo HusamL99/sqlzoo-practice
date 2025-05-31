@@ -1,0 +1,225 @@
+/*
+  SQL Queries against the `nobel` table
+*/
+
+------------------------------------------------------------------------------
+-- 1. Display all Nobel prizes awarded in 1950
+------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    yr = 1950
+ORDER BY
+    subject,        -- Optional: order by category for consistent output
+    winner;         -- Within each category, sort by recipient name
+
+-------------------------------------------------------------------------------
+-- 2. Show who won the 1962 Nobel Prize for Literature
+-------------------------------------------------------------------------------
+SELECT
+    winner
+FROM
+    nobel
+WHERE
+    yr = 1962
+    AND subject = 'Literature'
+ORDER BY
+    winner;         -- Alphabetical order
+
+-------------------------------------------------------------------------------
+-- 3. Show the year and subject that "Albert Einstein" won his prize
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject
+FROM
+    nobel
+WHERE
+    winner = 'Albert Einstein'
+ORDER BY
+    yr;             -- If multiple prizes, list chronologically
+
+-------------------------------------------------------------------------------
+-- 4. List "Peace" prize winners from 2000 onward (inclusive)
+-------------------------------------------------------------------------------
+SELECT
+    winner
+FROM
+    nobel
+WHERE
+    subject = 'Peace'
+    AND yr >= 2000
+ORDER BY
+    yr;             -- Chronological listing for clarity
+
+-------------------------------------------------------------------------------
+-- 5. Show all details of Literature prize winners from 1980 through 1989
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    subject = 'Literature'
+    AND yr BETWEEN 1980 AND 1989
+ORDER BY
+    yr,             -- Year ascending
+    winner;         -- Recipient name ascending
+
+-------------------------------------------------------------------------------
+-- 6. Show details for specified U.S. Presidents who have Nobel Prizes
+--    Using an explicit WHERE ... IN list, and ORDER BY year for timeline context
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    winner IN (
+        'Theodore Roosevelt',
+        'Thomas Woodrow Wilson',
+        'Jimmy Carter',
+        'Barack Obama'
+    )
+ORDER BY
+    yr,             -- Chronological order
+    winner;         -- Alphabetical order within the same year
+
+-------------------------------------------------------------------------------
+-- 7. Show the winners whose first name is "John"
+-------------------------------------------------------------------------------
+SELECT
+    winner
+FROM
+    nobel
+WHERE
+    winner LIKE 'John%'   -- Efficient pattern matching for prefix
+ORDER BY
+    winner;               -- Alphabetical order
+
+-------------------------------------------------------------------------------
+-- 8. Show year, subject, and winner of Physics winners for 1980
+--    together with Chemistry winners for 1984
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    (subject = 'Physics'   AND yr = 1980)
+    OR (subject = 'Chemistry' AND yr = 1984)
+ORDER BY
+    yr,             -- Year ascending (1980, then 1984)
+    subject,        -- Subject alphabetical (if same year)
+    winner;         -- Recipient name alphabetical
+
+-------------------------------------------------------------------------------
+-- 9. Show winners from 1980 excluding "Chemistry" and "Medicine"
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    yr = 1980
+    AND subject NOT IN ('Chemistry', 'Medicine')
+ORDER BY
+    subject,        -- Category alphabetical
+    winner;         -- Recipient name alphabetical
+
+-------------------------------------------------------------------------------
+-- 10. Show details of:
+--     a) "Medicine" prize winners before 1910 (yr < 1910),
+--     b) "Literature" prize winners from 2004 onward (yr >= 2004).
+--    Combine with OR and order chronologically.
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    (subject = 'Medicine'  AND yr < 1910)
+    OR (subject = 'Literature' AND yr >= 2004)
+ORDER BY
+    yr,
+    subject,        -- Secondary sort to group by category within each year
+    winner;         -- Tertiary sort by recipient name
+
+-------------------------------------------------------------------------------
+-- 11. Find all details of the prize won by "Peter Grünberg"
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    winner = 'Peter Grünberg'
+ORDER BY
+    yr;             -- In case of multiple entries, show chronologically
+
+-------------------------------------------------------------------------------
+-- 12. Find all details of the prize won by "Eugene O'Neill"
+--     Note: Escape single quote in O'Neill
+-------------------------------------------------------------------------------
+SELECT
+    yr,
+    subject,
+    winner
+FROM
+    nobel
+WHERE
+    winner = 'Eugene O''Neill'    -- Use two single quotes to escape
+ORDER BY
+    yr;
+
+-------------------------------------------------------------------------------
+-- 13. List winners whose names start with "Sir", sorted by most recent first,
+--     then by winner name ascending
+-------------------------------------------------------------------------------
+SELECT
+    winner,
+    yr,
+    subject
+FROM
+    nobel
+WHERE
+    winner LIKE 'Sir%'             -- Prefix match for "Sir"
+ORDER BY
+    yr DESC,                       -- Most recent first
+    winner ASC;                    -- Alphabetical within same year
+
+-------------------------------------------------------------------------------
+-- 14. Show 1984 winners and subjects, ordering "Chemistry" and "Physics" last:
+--     Use a BOOLEAN expression in ORDER BY to push those subjects to the end.
+-------------------------------------------------------------------------------
+SELECT
+    winner,
+    subject
+FROM
+    nobel
+WHERE
+    yr = 1984
+ORDER BY
+    (CASE WHEN subject IN ('Physics', 'Chemistry') THEN 1 ELSE 0 END) ASC,
+    subject ASC,
+    winner ASC;
+
+-------------------------------------------------------------------------------
+-- End of SQL script
+-------------------------------------------------------------------------------
