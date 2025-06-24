@@ -1,0 +1,220 @@
+/*==============================================================================
+1) Countries with population larger than Russia’s
+==============================================================================*/
+SELECT
+    w.name
+FROM
+    world AS w
+WHERE
+    w.population > (
+        -- fetch Russia’s population
+        SELECT
+            population
+        FROM
+            world
+        WHERE
+            name = 'Russia'
+    )
+ORDER BY
+    w.name;
+
+
+/*==========================================================================================
+2) European countries whose per-capita GDP exceeds that of the United Kingdom
+============================================================================================*/
+SELECT
+    w.name
+FROM
+    world AS w
+WHERE
+    w.continent = 'Europe'
+    AND (w.gdp * 1.0 / w.population) > (
+        -- compute UK per-capita GDP
+        SELECT
+            gdp * 1.0 / population
+        FROM
+            world
+        WHERE
+            name = 'United Kingdom'
+    )
+ORDER BY
+    w.name;
+
+
+/*=====================================================================================================
+3) Countries in any continent that contains Argentina or Australia; ordered by name
+=======================================================================================================*/
+SELECT
+    w.name,
+    w.continent
+FROM
+    world AS w
+WHERE
+    w.continent IN (
+        -- list continents for Argentina or Australia
+        SELECT
+            DISTINCT continent
+        FROM
+            world
+        WHERE
+            name IN ('Argentina', 'Australia')
+    )
+ORDER BY
+    w.name;
+
+
+/*=====================================================================================================
+4) Country with population > UK but < Germany; show name and population
+=======================================================================================================*/
+SELECT
+    w.name,
+    w.population
+FROM
+    world AS w
+WHERE
+    w.population > (
+        SELECT population
+        FROM world
+        WHERE name = 'United Kingdom'
+    )
+    AND w.population < (
+        SELECT population
+        FROM world
+        WHERE name = 'Germany'
+    )
+ORDER BY
+    w.name;
+
+
+/*=====================================================================
+5) European country populations as % of Germany’s population
+=======================================================================*/
+SELECT
+    w.name,
+    -- round to whole percent, cast to INT, append '%'
+    CONCAT(
+        CAST(
+            ROUND(
+                100.0 * w.population -- Multiplies the country’s population by 100, divides by Germany’s, giving a percentage value 
+                / (
+                    SELECT population
+                    FROM world
+                    WHERE name = 'Germany'
+                ),
+                0 -- Rounds that raw percentage to zero decimal places
+            ) AS INT -- Converts the rounded number from a numeric type to an integer, stripping any “.0” tail.
+        ),
+        '%' -- Turns the integer into text and appends a literal percent sign, 84 → '84%'
+    ) AS pct_of_germany
+FROM
+    world AS w
+WHERE
+    w.continent = 'Europe'
+ORDER BY
+    w.name;
+
+
+/*==================================================================================
+6) Countries with GDP > every non-NULL GDP of European countries
+====================================================================================*/
+SELECT
+    w.name
+FROM
+    world AS w
+WHERE
+    w.gdp > ALL (
+        SELECT
+            e.gdp
+        FROM
+            world AS e
+        WHERE
+            e.continent = 'Europe'
+            AND e.gdp IS NOT NULL
+    )
+ORDER BY
+    w.name;
+
+
+/*==========================================================================================
+7) Largest country (by area) in each continent: show continent, name, and area. This example is known as a correlated or synchronized sub-query
+==========================================================================================*/
+SELECT
+    w.continent,
+    w.name,
+    w.area
+FROM
+    world AS w
+WHERE
+    w.area = (
+        -- find max area for this continent
+        SELECT
+            MAX(w2.area)
+        FROM
+            world AS w2
+        WHERE
+            w2.continent = w.continent
+    )
+ORDER BY
+    w.continent;
+
+
+/*==========================================================================================
+8) First country alphabetically in each continent
+============================================================================================*/
+SELECT
+    w.continent,
+    MIN(w.name) AS first_country
+FROM
+    world AS w
+GROUP BY
+    w.continent
+ORDER BY
+    w.continent;
+
+
+/*==========================================================================================
+9) Countries on continents where all populations ≤ 25,000,000
+============================================================================================*/
+SELECT
+    w.name,
+    w.continent,
+    w.population
+FROM
+    world AS w
+WHERE
+    w.continent IN (
+        SELECT
+            continent
+        FROM
+            world
+        GROUP BY
+            continent
+        HAVING
+            MAX(population) <= 25000000
+    )
+ORDER BY
+    w.continent,
+    w.name;
+
+
+/*=====================================================================================
+10) Countries whose population is > 3× every other country in their continent
+=======================================================================================*/
+SELECT
+    w1.name,
+    w1.continent
+FROM
+    world AS w1
+WHERE
+    w1.population > ALL (
+        SELECT
+            3 * w2.population
+        FROM
+            world AS w2
+        WHERE
+            w2.continent = w1.continent
+            AND w2.name <> w1.name
+    )
+ORDER BY
+    w1.continent,
+    w1.name;
