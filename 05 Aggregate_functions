@@ -1,3 +1,4 @@
+-- The World table https://sqlzoo.net/wiki/SUM_and_COUNT
 -- 1. Total world population
 SELECT
   SUM(population) AS total_world_population  -- give result a clear alias
@@ -70,3 +71,147 @@ GROUP BY
   continent
 HAVING
   SUM(population) >= 100000000;                -- use HAVING to filter on aggregated sum
+
+
+
+
+
+
+-- The Nobel table https://sqlzoo.net/wiki/The_nobel_table_can_be_used_to_practice_more_SUM_and_COUNT_functions.
+
+-- 1. Total number of Nobel prizes awarded (one row per prize)
+SELECT
+  COUNT(*) AS total_prizes_awarded      -- COUNT(*) is preferred for row counts
+FROM
+  nobel;
+
+
+-- 2. List each subject only once
+SELECT
+  DISTINCT (subject)                       -- DISTINCT avoids duplicates
+FROM
+  nobel
+ORDER BY
+  subject;                               
+
+
+-- 3. Total number of Physics prizes
+SELECT
+  COUNT(*)                 AS physics_prize_count
+FROM
+  nobel
+WHERE
+  subject = 'Physics';                  
+
+
+-- 4. Number of prizes per subject
+SELECT
+  subject,
+  COUNT(*)                 AS prize_count
+FROM
+  nobel
+GROUP BY
+  subject
+ORDER BY
+  prize_count DESC;                     -- show subjects with the most prizes first
+
+
+-- 5. First year, each subject was awarded
+SELECT
+  subject,
+  MIN(yr)                   AS first_award_year
+FROM
+  nobel
+GROUP BY
+  subject
+ORDER BY
+  first_award_year;                      -- chronological listing
+
+
+-- 6. Prizes awarded per subject in the year 2000
+SELECT
+  subject,
+  COUNT(*)                 AS prizes_in_2000
+FROM
+  nobel
+WHERE
+  yr = 2000                             -- year filter applied pre-grouping
+GROUP BY
+  subject
+ORDER BY
+  prizes_in_2000 DESC;                  -- visibility of subjects with prizes that year
+
+
+-- 7. Count of unique winners per subject
+SELECT
+  subject,
+  COUNT(DISTINCT(winner))   AS unique_winner_count
+FROM
+  nobel
+GROUP BY
+  subject
+ORDER BY
+  unique_winner_count DESC;
+
+
+-- 8. Number of distinct award years per subject
+SELECT
+  subject,
+  COUNT(DISTINCT(yr))        AS award_years_count
+FROM
+  nobel
+GROUP BY
+  subject
+ORDER BY
+  award_years_count DESC;
+
+
+-- 9. Years when Physics had exactly three prizes
+SELECT
+  yr
+FROM
+  nobel
+WHERE
+  subject = 'Physics'
+GROUP BY
+  yr
+HAVING
+  COUNT(*) = 3;                           -- HAVING filters on aggregated count
+
+
+-- 10. Winners with more than one prize (any subject)
+SELECT
+  winner
+FROM
+  nobel
+GROUP BY
+  winner
+HAVING
+  COUNT(*) > 1;                           -- aggregate filter for repeats
+
+
+-- 11. Winners in more than one subject
+SELECT
+  winner
+FROM
+  nobel
+GROUP BY
+  winner
+HAVING
+  COUNT(DISTINCT subject) > 1;            -- counts unique subjects per winner
+
+
+-- 12. Year & subject combos with exactly three prizes, 2000 onward
+SELECT
+  yr,
+  subject
+FROM
+  nobel
+WHERE
+  yr >= 2000                             -- pre-filter on year
+GROUP BY
+  yr,
+  subject
+HAVING
+  COUNT(*) = 3;                          -- filter on aggregated count
+
