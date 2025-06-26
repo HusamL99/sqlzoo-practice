@@ -1,0 +1,195 @@
+-- The link to the exercises https://sqlzoo.net/wiki/The_JOIN_operation
+
+-- ==============================================
+-- 1. All German goals: match ID + player name
+-- ==============================================
+SELECT
+  g.id               AS match_id,        -- use unambiguous aliases
+  gl.player          AS scorer
+FROM
+  goal  AS gl
+  INNER JOIN game  AS g
+    ON gl.matchid = g.id                   -- join goal → match
+WHERE
+  gl.teamid = 'GER';                       -- filter for German scor
+
+-- ==============================================
+-- 2. Teams in the match where Lars Bender scored
+-- ==============================================
+SELECT
+  g.id               AS match_id,
+  g.stadium,
+  g.team1            AS home_team,
+  g.team2            AS away_team
+FROM
+  game AS g
+  INNER JOIN goal AS gl
+    ON gl.matchid = g.id
+WHERE
+  gl.matchid = 1012
+  AND gl.player = 'Lars Bender';
+
+-- ==============================================
+-- 3. Player, team, stadium & date for German goals
+-- ==============================================
+SELECT
+  gl.player,
+  gl.teamid,
+  g.stadium,
+  g.mdate            AS match_date
+FROM
+  game AS g
+  INNER JOIN goal AS gl
+    ON gl.matchid = g.id
+WHERE
+  gl.teamid = 'GER';                       -- UPPER() not needed if literal is already uppercase
+
+-- ==============================================
+-- 4. Mario goals: teams + player
+-- ==============================================
+SELECT
+  g.team1,
+  g.team2,
+  gl.player
+FROM
+  game AS g
+  INNER JOIN goal AS gl
+    ON gl.matchid = g.id
+WHERE
+  gl.player LIKE 'Mario%';                 -- pattern match for name prefix
+
+-- ==============================================
+-- 5. Early goals: player, team, coach & time ≤10
+-- ==============================================
+SELECT
+  gl.player,
+  gl.teamid,
+  t.coach,
+  gl.gtime           AS goal_minute
+FROM
+  goal AS gl
+  INNER JOIN eteam AS t
+    ON gl.teamid = t.id
+WHERE
+  gl.gtime <= 10;                          -- first 10 minutes
+
+-- ==============================================
+-- 6. Dates & team1 where coach = Fernando Santos
+-- ==============================================
+SELECT
+  g.mdate            AS match_date,
+  t.teamname
+FROM
+  game AS g
+  INNER JOIN eteam AS t
+    ON g.team1 = t.id                       -- join home team to its coach
+WHERE
+  t.coach = 'Fernando Santos';
+
+-- ==============================================
+-- 7. Players in Warsaw matches
+-- ==============================================
+SELECT DISTINCT
+  gl.player
+FROM
+  goal AS gl
+  INNER JOIN game AS g
+    ON gl.matchid = g.id
+WHERE
+  g.stadium = 'National Stadium, Warsaw';
+
+-- ==============================================
+-- 8. Non-German scorers against Germany
+-- ==============================================
+SELECT DISTINCT
+  gl.player
+FROM
+  game  AS g
+  JOIN goal AS gl ON gl.matchid = g.id
+WHERE
+  (g.team1 = 'GER' OR g.team2 = 'GER')
+  AND gl.teamid <> 'GER';
+
+-- ==============================================
+-- 9. Goals per team: teamname + count
+-- ==============================================
+SELECT
+  t.teamname,
+  COUNT(*)          AS goals_scored
+FROM
+  eteam AS t
+  LEFT JOIN goal AS gl
+    ON gl.teamid = t.id
+GROUP BY
+  t.teamname
+ORDER BY
+  t.teamname;                              -- alphabetical
+
+-- ==============================================
+-- 10. Goals per stadium
+-- ==============================================
+SELECT
+  g.stadium,
+  COUNT(gl.player)  AS goals_scored
+FROM
+  game AS g
+  LEFT JOIN goal AS gl
+    ON gl.matchid = g.id
+GROUP BY
+  g.stadium
+ORDER BY
+  goals_scored DESC;                       -- busiest venues first
+
+-- ==============================================
+-- 11. Matches with Poland: matchid, date & total goals
+-- ==============================================
+SELECT
+  g.id               AS match_id,
+  g.mdate            AS match_date,
+  COUNT(gl.player)        AS total_goals
+FROM
+  game AS g
+  LEFT JOIN goal AS gl
+    ON gl.matchid = g.id
+WHERE
+  'POL' IN (g.team1, g.team2)              -- Poland home or away
+GROUP BY
+  g.id, g.mdate
+ORDER BY
+  g.mdate;
+
+-- ==============================================
+-- 12. Germany’s goal tally per match
+-- ==============================================
+SELECT
+  g.id               AS match_id,
+  g.mdate            AS match_date,
+  COUNT(gl.player)        AS goals_by_GER
+FROM
+  game AS g
+  INNER JOIN goal AS gl
+    ON gl.matchid = g.id
+WHERE
+  gl.teamid = 'GER'
+GROUP BY
+  g.id, g.mdate
+ORDER BY
+  g.mdate;
+
+-- ==============================================
+-- 13. Goals per team per match using CASE
+-- ==============================================
+SELECT
+  g.mdate            AS match_date,
+  g.team1,
+  SUM(CASE WHEN gl.teamid = g.team1 THEN 1 ELSE 0 END) AS goals_team1,
+  g.team2,
+  SUM(CASE WHEN gl.teamid = g.team2 THEN 1 ELSE 0 END) AS goals_team2
+FROM
+  game AS g
+  LEFT JOIN goal AS gl
+    ON gl.matchid = g.id
+GROUP BY
+  g.mdate, g.id, g.team1, g.team2
+ORDER BY
+  g.mdate, g.id, g.team1, g.team2;
